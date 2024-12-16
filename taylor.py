@@ -1,22 +1,21 @@
-from tkinter import Label, Entry, Button, messagebox
+from tkinter import Label, Entry, Button, Text, messagebox, Frame
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 # Función para calcular y graficar la serie de Taylor
 def serieTaylor(funcion, a, n, frame):
-    print(funcion)
-    print(a)
-    print(n)
     try:
         x = sp.symbols('x')  # Variable simbólica
-        f = sp.sympify(funcion)  # Convertir la entrada en una función simbólica
+        f = sp.parse_expr(funcion)  # Convertir la entrada en una función simbólica
         T = f.subs(x, a)  # Primer término de la serie de Taylor
+        derivadas = [f"f(x) = {f}"]
 
         # Calcular los términos de la serie de Taylor
         for k in range(1, n + 1):
             dfk = sp.diff(f, x)  # Derivada k-ésima
+            derivadas.append(f"f^{k}(x) = {dfk}")
             T = T + dfk.subs(x, a) * ((x - a)**k) / sp.factorial(k)  # Añadir término k
             f = dfk  # Actualizar la función para la próxima derivada
 
@@ -40,7 +39,26 @@ def serieTaylor(funcion, a, n, frame):
                 widget.get_tk_widget().destroy()  # Eliminar gráficos previos
         canvas = FigureCanvasTkAgg(fig, master=frame)  # Crear el canvas de matplotlib
         canvas.draw()  # Dibujar el gráfico
-        canvas.get_tk_widget().grid(row=5, column=0, columnspan=3, padx=10, pady=10)  # Colocar el gráfico en el frame
+        canvas.get_tk_widget().grid(row=5, column=0, padx=10, pady=10)  # Colocar el gráfico en el frame
+
+        # Añadir barra de herramientas de navegación
+        toolbar_frame = Frame(frame)
+        toolbar_frame.grid(row=6, column=0, padx=10, pady=10)
+        toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
+        toolbar.update()
+
+        # Crear un frame para las derivadas
+        frame_derivadas = Frame(frame, bg='white')
+        frame_derivadas.grid(row=5, column=1, padx=10, pady=10, sticky='n')
+
+        # Título para las derivadas
+        Label(frame_derivadas, text="Derivadas", bg='black', font=("Helvetica", 14)).pack(pady=5)
+
+        # Mostrar las derivadas en el frame
+        text_derivadas = Text(frame_derivadas, height=20, width=50, bg='black')
+        text_derivadas.pack(pady=5)
+        text_derivadas.insert('1.0', "\n".join(derivadas))
+        text_derivadas.config(state='disabled')
 
     except Exception as e:
         messagebox.showerror("Error", f"Se produjo un error: {str(e)}")
@@ -69,7 +87,7 @@ def series_de_taylor(frame):
     # Botón para ejecutar la serie de Taylor
     def ejecutar_serie_taylor():
         try:
-            funcion = entrada_funcion.get()  # Obtener la función f(x)
+            funcion = entrada_funcion.get().replace(' ', '')  # Obtener la función f(x) y eliminar espacios
             a = float(entrada_a.get())  # Obtener el punto 'a' de la entrada
             n = int(entrada_n.get())  # Obtener el grado del polinomio de Taylor
             serieTaylor(funcion, a, n, frame)  # Llamar a la función serieTaylor con los parámetros

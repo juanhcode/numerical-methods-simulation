@@ -1,3 +1,4 @@
+# app.py
 import tkinter as tk
 from metodos import *
 
@@ -9,11 +10,11 @@ root.config(bg="#F3F4F6")  # Fondo claro para mejor contraste
 
 # Título principal
 title_label = tk.Label(
-    root, 
-    text="Simulación y Computación Numérica", 
-    font=("Helvetica", 20, "bold"), 
-    bg="#2C3E50", 
-    fg="#ECF0F1", 
+    root,
+    text="Simulación y Computación Numérica",
+    font=("Helvetica", 20, "bold"),
+    bg="#2C3E50",
+    fg="#ECF0F1",
     pady=20
 )
 title_label.pack(fill="x")
@@ -34,28 +35,35 @@ button_style = {
     "height": 2   # Altura uniforme para lograr un diseño cuadrado
 }
 
-# Crear los botones en una sola columna
-tk.Button(frame, text="Series de Taylor", command=lambda: cambiar_vista("taylor"), **button_style).grid(row=0, column=0, padx=10, pady=10)
-tk.Button(frame, text="Método de Newton", command=lambda: cambiar_vista("newton"), **button_style).grid(row=1, column=0, padx=10, pady=10)
-tk.Button(frame, text="Diferencias Finitas", command=lambda: cambiar_vista("diferencias_finitas"), **button_style).grid(row=2, column=0, padx=10, pady=10)
-tk.Button(frame, text="Ecuaciones No Lineales", command=lambda: cambiar_vista("no_lineales"), **button_style).grid(row=3, column=0, padx=10, pady=10)
-tk.Button(frame, text="Ecuaciones Lineales", command=lambda: cambiar_vista("lineales"), **button_style).grid(row=4, column=0, padx=10, pady=10)
-tk.Button(frame, text="Ecuaciones Parciales", command=lambda: cambiar_vista("parciales"), **button_style).grid(row=5, column=0, padx=10, pady=10)
-
-
-# app.py
+# Función para cambiar la vista
 def cambiar_vista(vista):
-    # Limpiar el contenido de la ventana principal
+    # Limpiar el contenido del frame
     for widget in frame.winfo_children():
         widget.destroy()
 
     # Dependiendo de la vista seleccionada, cargar el contenido correspondiente
     if vista == "taylor":
-        series_de_taylor(frame)  # Pasar 'frame' como argumento
+        series_de_taylor(frame, lambda: cambiar_vista("menu_principal"))
     elif vista == "newton":
-        newton(frame)
+        newton(frame, lambda: cambiar_vista("menu_principal"))
+    elif vista == "diferencias_finitas":
+        diferencias_finitias(frame, lambda: cambiar_vista("menu_principal"))
+    elif vista == "no_lineales":
+        ecuaciones_no_lineales(frame, lambda: cambiar_vista("menu_principal"))
+    elif vista == "menu_principal":
+        cargar_menu_principal()
 
+# Función para cargar el menú principal
+def cargar_menu_principal():
+    tk.Button(frame, text="Series de Taylor", command=lambda: cambiar_vista("taylor"), **button_style).grid(row=0, column=0, padx=10, pady=10)
+    tk.Button(frame, text="Método de Newton", command=lambda: cambiar_vista("newton"), **button_style).grid(row=1, column=0, padx=10, pady=10)
+    tk.Button(frame, text="Diferencias Finitas", command=lambda: cambiar_vista("diferencias_finitas"), **button_style).grid(row=2, column=0, padx=10, pady=10)
+    tk.Button(frame, text="Ecuaciones No Lineales", command=lambda: cambiar_vista("no_lineales"), **button_style).grid(row=3, column=0, padx=10, pady=10)
+    tk.Button(frame, text="Ecuaciones Lineales", command=lambda: cambiar_vista("lineales"), **button_style).grid(row=4, column=0, padx=10, pady=10)
+    tk.Button(frame, text="Ecuaciones Parciales", command=lambda: cambiar_vista("parciales"), **button_style).grid(row=5, column=0, padx=10, pady=10)
 
+# Cargar el menú principal al inicio
+cargar_menu_principal()
 
 # Iniciar la aplicación
 root.mainloop()
