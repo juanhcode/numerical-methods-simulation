@@ -50,6 +50,10 @@ def cambiar_vista(vista):
         diferencias_finitias(frame, lambda: cambiar_vista("menu_principal"))
     elif vista == "no_lineales":
         ecuaciones_no_lineales(frame, lambda: cambiar_vista("menu_principal"))
+    elif vista == "lineales":
+        resolver_ecuaciones_lineales(frame, lambda: cambiar_vista("menu_principal"))
+    elif vista == "parciales":
+        ecuaciones_parciales(frame, lambda: cambiar_vista("menu_principal"))
     elif vista == "menu_principal":
         cargar_menu_principal()
 

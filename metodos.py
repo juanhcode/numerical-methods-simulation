@@ -4,6 +4,8 @@ from taylor import serieTaylor
 from newton import method_newton_raphson
 from diferencias_finitas import method_diferencias_finitas
 from ecuaciones_no_lineales import method_biseccion
+from ecuaciones_lineales import method_ecuaciones_lineales
+from ecuaciones_diferenciales_parciales import ecuaciones_diferenciales_parciales
 
 def series_de_taylor(frame, ventana_principal):
     # Crear interfaz para la serie de Taylor
@@ -163,46 +165,93 @@ def ecuaciones_no_lineales(frame, ventana_principal):
 
     Button(frame, text="Ejecutar Método de Bisección", command=ejecutar_biseccion).grid(row=5, column=0, columnspan=2, pady=10)
 
-def ecuaciones_lineales(frame, ventana_principal):
-    # Crear interfaz para el método de Gauss-Seidel
-    label = Label(frame, text="Ecuaciones Lineales (Método de Gauss-Seidel)", font=("Helvetica", 16))
+def resolver_ecuaciones_lineales(frame, ventana_principal):
+    # Crear interfaz para resolver ecuaciones lineales
+    label = Label(frame, text="Resolver Ecuaciones Lineales", font=("Helvetica", 16))
     label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
 
     # Botón para volver al menú principal
     Button(frame, text="Volver", command=ventana_principal).grid(row=0, column=0, pady=10, sticky="w")
 
     # Entrada para el sistema de ecuaciones
-    Label(frame, text="Ingresa el sistema de ecuaciones (por ejemplo, [[4, -1, 0, 3], [1, 15.5, 3, 8], [0, -1.3, -4, 1.1]]):").grid(row=1, column=0, sticky="e", padx=10, pady=5)
+    Label(frame, text="Ingresa el sistema de ecuaciones:").grid(row=1, column=0, sticky="e", padx=10, pady=5)
     entrada_sistema = Entry(frame)
     entrada_sistema.grid(row=1, column=1, padx=10, pady=5)
 
     # Entrada para el vector de términos independientes
-    Label(frame, text="Ingresa el vector de términos independientes (por ejemplo, [1, 1, 1]):").grid(row=2, column=0, sticky="e", padx=10, pady=5)
+    Label(frame, text="Ingresa el vector de términos independientes:").grid(row=2, column=0, sticky="e", padx=10, pady=5)
     entrada_vector = Entry(frame)
     entrada_vector.grid(row=2, column=1, padx=10, pady=5)
 
-    # Entrada para la tolerancia
-    Label(frame, text="Ingresa la tolerancia:").grid(row=3, column=0, sticky="e", padx=10, pady=5)
+    # Entradas para tolerancia e iteraciones
+    Label(frame, text="Tolerancia:").grid(row=3, column=0, sticky="e", padx=10, pady=5)
     entrada_tolerancia = Entry(frame)
     entrada_tolerancia.grid(row=3, column=1, padx=10, pady=5)
 
-    # Entrada para el número máximo de iteraciones
-    Label(frame, text="Ingresa el número máximo de iteraciones:").grid(row=4, column=0, sticky="e", padx=10, pady=5)
+    Label(frame, text="Máximo de iteraciones:").grid(row=4, column=0, sticky="e", padx=10, pady=5)
     entrada_iteraciones = Entry(frame)
     entrada_iteraciones.grid(row=4, column=1, padx=10, pady=5)
 
-    def ejecutar_gauss_seidel():
+    # Botón para ejecutar la resolución de ecuaciones lineales
+    def ejecutar_resolver_ecuaciones():
         try:
             sistema = eval(entrada_sistema.get())  # Obtener el sistema de ecuaciones
             vector = eval(entrada_vector.get())  # Obtener el vector de términos independientes
             tolerancia = float(entrada_tolerancia.get())  # Obtener la tolerancia
-            iteraciones = int(entrada_iteraciones.get())  # Obtener el número máximo de iteraciones
-            # Llamar a la función de Gauss-Seidel con los parámetros
-            method_gauss_seidel(sistema, vector, tolerancia, iteraciones, frame)
-        except ValueError:
-            messagebox.showerror("Error", "Por favor ingresa valores válidos")
-        except SyntaxError:
-            messagebox.showerror("Error", "Por favor ingresa el sistema de ecuaciones y el vector en el formato correcto")
+            iteraciones = int(entrada_iteraciones.get())  # Obtener el máximo de iteraciones
 
-    # Botón para ejecutar el método de Gauss-Seidel
-    Button(frame, text="Ejecutar Método de Gauss-Seidel", command=ejecutar_gauss_seidel).grid(row=5, column=0, columnspan=2, pady=10)
+            # Llamar a la función method_ecuaciones_lineales con los datos
+            method_ecuaciones_lineales(sistema, vector, frame, tolerancia, iteraciones)
+        except Exception as e:
+            messagebox.showerror("Error", f"Entrada inválida: {e}")
+
+    Button(frame, text="Resolver Ecuaciones Lineales", command=ejecutar_resolver_ecuaciones).grid(row=5, column=0, columnspan=2, pady=10)
+
+def ecuaciones_parciales(frame, ventana_principal):
+    # Crear interfaz para resolver ecuaciones parciales
+    label = Label(frame, text="Resolver Ecuaciones Parciales", font=("Helvetica", 16))
+    label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+    # Botón para volver al menú principal
+    Button(frame, text="Volver", command=ventana_principal).grid(row=0, column=0, pady=10, sticky="w")
+
+    # Entrada para la ecuación f(x, y)
+    Label(frame, text="Ingresa la ecuación f(x, y) = 0 (por ejemplo, x^2 - y^2):").grid(row=1, column=0, sticky="e", padx=10, pady=5)
+    entrada_funcion = Entry(frame)
+    entrada_funcion.grid(row=1, column=1, padx=10, pady=5)
+
+    # Entrada para la condición inicial u(x, y)
+    Label(frame, text="Ingresa la condición inicial u(x, y) = g(x, y):").grid(row=2, column=0, sticky="e", padx=10, pady=5)
+    entrada_condicion = Entry(frame)
+    entrada_condicion.grid(row=2, column=1, padx=10, pady=5)
+
+    # Entrada para el intervalo [a, b] x [c, d]
+    Label(frame, text="Ingresa el intervalo [a, b]:").grid(row=3, column=0, sticky="e", padx=10, pady=5)
+    entrada_intervalo = Entry(frame)
+    entrada_intervalo.grid(row=3, column=1, padx=10, pady=5)
+
+    # Entrada para el número de puntos en x
+    Label(frame, text="Ingresa el número de puntos en x (por ejemplo, 50):").grid(row=4, column=0, sticky="e", padx=10, pady=5)
+    entrada_puntos = Entry(frame)
+    entrada_puntos.grid(row=4, column=1, padx=10, pady=5)
+
+    # Botón para ejecutar la resolución de ecuaciones parciales
+    def ejecutar_ecua_parciales():
+        try:
+            funcion_str = entrada_funcion.get()  # Obtener la ecuación f(x, y)
+            condicion_str = entrada_condicion.get()  # Obtener la condición inicial u(x, y)
+            intervalo_str = entrada_intervalo.get()  # Obtener el intervalo
+            puntos = int(entrada_puntos.get())  # Obtener el número de puntos
+
+            # Convertir las entradas en funciones utilizables
+            funcion = eval(f"lambda x, y: {funcion_str}")  # Asegúrate de pasar tanto 'x' como 'y'
+            condicion = eval(f"lambda x, y: {condicion_str}")  # Asegúrate de pasar tanto 'x' como 'y'
+            intervalo = list(map(float, intervalo_str.split(',')))  # Convertir a lista de floats
+
+            # Llamar a la función de ecuaciones parciales
+            ecuaciones_diferenciales_parciales(funcion, condicion, intervalo, puntos, frame)
+        except Exception as e:
+            messagebox.showerror("Error", f"Por favor verifica tus entradas: {e}")
+    
+    # Botón para resolver las ecuaciones
+    Button(frame, text="Resolver Ecuaciones Parciales", command=ejecutar_ecua_parciales).grid(row=5, column=0, columnspan=2, pady=10)
