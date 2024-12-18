@@ -1,48 +1,41 @@
-from tkinter import ttk, Frame, Scrollbar, VERTICAL, HORIZONTAL, messagebox
-from sympy import sympify, symbols
+from tkinter import ttk, Frame, Scrollbar, VERTICAL, HORIZONTAL, messagebox, Label, Entry, Button
+from sympy import sympify, symbols, diff, Matrix
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 
-
-def method_biseccion(funcion, intervalo, tolerancia, iteraciones, frame):
+def method_jacobiano(funcion1, funcion2, aproximacion, frame):
     try:
         # Limpiar el frame
         for widget in frame.winfo_children():
             widget.destroy()
 
         # Configurar variables
-        x = symbols('x')
-        f = sympify(funcion)
-        a, b = map(float, intervalo.split(","))
-        if f.subs(x, a) * f.subs(x, b) > 0:
-            raise ValueError("La función debe tener signos opuestos en los extremos del intervalo o uno de los extremos debe ser una raíz")
+        x, y = symbols('x y')
+        f1 = sympify(funcion1)
+        f2 = sympify(funcion2)
+        x0, y0 = aproximacion
+        tol = 1e-6
+        max_iter = 50
 
-        i = 1
-        error = tolerancia + 1
+        # Definir las funciones y el Jacobiano
+        F = Matrix([f1, f2])
+        J = F.jacobian([x, y])
+
+        iteraciones = []
         x_vals = []
-        f_vals = []
-        a_vals = []
-        b_vals = []
-        mid_vals = []
+        y_vals = []
+        for i in range(max_iter):
+            F_val = F.subs({x: x0, y: y0})
+            J_val = J.subs({x: x0, y: y0})
+            delta = J_val.inv() * (-F_val)
+            x0, y0 = x0 + delta[0], y0 + delta[1]
+            iteraciones.append((i + 1, x0, y0, F_val[0], F_val[1], J_val))
+            x_vals.append(x0)
+            y_vals.append(y0)
 
-        # Calcular iteraciones
-        while error > tolerancia and i <= iteraciones:
-            x1 = (a + b) / 2
-            f1 = f.subs(x, x1)
-            x_vals.append(x1)
-            f_vals.append(f1)
-            a_vals.append(a)
-            b_vals.append(b)
-            mid_vals.append(x1)
-
-            if f.subs(x, a) * f1 < 0:
-                b = x1
-            else:
-                a = x1
-
-            error = abs(f1)
-            i += 1
+            if max(abs(delta)) < tol:
+                break
 
         # Crear contenedor para Treeview con scroll
         container = Frame(frame)
@@ -51,15 +44,14 @@ def method_biseccion(funcion, intervalo, tolerancia, iteraciones, frame):
         scrollbar_y = Scrollbar(container, orient=VERTICAL)
         scrollbar_x = Scrollbar(container, orient=HORIZONTAL)
 
-        tree = ttk.Treeview(container, columns=("Iteración", "a", "b", "x", "f(a)", "f(b)", "f(x)"),
+        tree = ttk.Treeview(container, columns=("Iteración", "x", "y", "f1(x,y)", "f2(x,y)", "Jacobian"),
                             show='headings', yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
         tree.heading("Iteración", text="Iteración")
-        tree.heading("a", text="a")
-        tree.heading("b", text="b")
         tree.heading("x", text="x")
-        tree.heading("f(a)", text="f(a)")
-        tree.heading("f(b)", text="f(b)")
-        tree.heading("f(x)", text="f(x)")
+        tree.heading("y", text="y")
+        tree.heading("f1(x,y)", text="f1(x,y)")
+        tree.heading("f2(x,y)", text="f2(x,y)")
+        tree.heading("Jacobian", text="Jacobian")
 
         scrollbar_y.config(command=tree.yview)
         scrollbar_x.config(command=tree.xview)
@@ -69,43 +61,64 @@ def method_biseccion(funcion, intervalo, tolerancia, iteraciones, frame):
         tree.pack(side="left", fill="both", expand=True)
 
         # Insertar datos
-        for i in range(len(x_vals)):
+        for iteracion in iteraciones:
+            i, x_val, y_val, f1_val, f2_val, J_val = iteracion
             tree.insert("", "end", values=(
-                i + 1, f"{a_vals[i]:.6f}", f"{b_vals[i]:.6f}", f"{x_vals[i]:.6f}",
-                f"{f.subs(x, a_vals[i]):.6f}", f"{f.subs(x, b_vals[i]):.6f}", f"{f_vals[i]:.6f}"
+                i, f"{x_val:.6f}", f"{y_val:.6f}", f"{f1_val:.6f}", f"{f2_val:.6f}", J_val
             ))
 
-        # Graficar resultados
-        fig, ax = plt.subplots(figsize=(8, 4))
-
-        # Graficar la función en el intervalo
-        x_range = np.linspace(a_vals[0], b_vals[0], 400)
-        y_range = [f.subs(x, val) for val in x_range]
-        ax.plot(x_range, y_range, label=f"f(x) = {funcion}")
-
-        # Graficar las iteraciones
-        colors = plt.cm.viridis(np.linspace(0, 1, len(x_vals)))
-        for i in range(len(x_vals)):
-            ax.plot(x_vals[i], f_vals[i], 'o', color=colors[i], label=f"Iteración {i+1}")
-            if i > 0:
-                ax.plot([x_vals[i-1], x_vals[i]], [f_vals[i-1], f_vals[i]], color=colors[i])
-        ax.axhline(0, color='red', linestyle='--')
-        ax.set_title("Convergencia del Método de Bisección")
-        ax.set_xlabel("Punto medio (x)")
-        ax.set_ylabel("f(x)")
+        # Crear la gráfica de las iteraciones
+        fig, ax = plt.subplots()
+        ax.plot(x_vals, y_vals, 'bo-', label='Iteraciones')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_title('Iteraciones del Método de Jacobiano')
         ax.legend()
-        ax.grid()
 
-        # Insertar gráfico en el frame
-        canvas = FigureCanvasTkAgg(fig, frame)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.grid(row=1, column=0, columnspan=2, pady=10, sticky="nsew")
+        # Integrar la gráfica en el frame de tkinter
+        canvas = FigureCanvasTkAgg(fig, master=frame)
         canvas.draw()
+        canvas.get_tk_widget().grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
 
         # Configuración del frame principal
         frame.grid_rowconfigure(0, weight=1)
         frame.grid_columnconfigure(0, weight=1)
+        frame.grid_columnconfigure(1, weight=1)
         frame.update_idletasks()
 
     except Exception as e:
         messagebox.showerror("Error", str(e))
+
+def ecuaciones_no_lineales(frame, ventana_principal):
+    # Crear interfaz para el método de Jacobiano
+    label = Label(frame, text="Ecuaciones No Lineales (Método de Jacobiano)", font=("Helvetica", 16))
+    label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+    # Botón para volver al menú principal
+    Button(frame, text="Volver", command=ventana_principal).grid(row=0, column=0, pady=10, sticky="w")
+
+    # Entrada para la primera ecuación f1(x, y)
+    Label(frame, text="Ingresa la primera ecuación f1(x, y) = 0: ").grid(row=1, column=0, sticky="e", padx=10, pady=5)
+    entrada_funcion1 = Entry(frame)
+    entrada_funcion1.grid(row=1, column=1, padx=10, pady=5)
+
+    # Entrada para la segunda ecuación f2(x, y)
+    Label(frame, text="Ingresa la segunda ecuación f2(x, y) = 0: ").grid(row=2, column=0, sticky="e", padx=10, pady=5)
+    entrada_funcion2 = Entry(frame)
+    entrada_funcion2.grid(row=2, column=1, padx=10, pady=5)
+
+    # Entrada para la aproximación inicial
+    Label(frame, text="Ingresa la aproximación inicial (x0, y0): ").grid(row=3, column=0, sticky="e", padx=10, pady=5)
+    entrada_aproximacion = Entry(frame)
+    entrada_aproximacion.grid(row=3, column=1, padx=10, pady=5)
+
+    def ejecutar_jacobiano():
+        try:
+            funcion1 = entrada_funcion1.get()
+            funcion2 = entrada_funcion2.get()
+            aproximacion = eval(entrada_aproximacion.get())
+            method_jacobiano(funcion1, funcion2, aproximacion, frame)
+        except ValueError:
+            messagebox.showerror("Error", "Por favor ingresa valores válidos")
+
+    Button(frame, text="Ejecutar Método de Jacobiano", command=ejecutar_jacobiano).grid(row=4, column=0, columnspan=2, pady=10)

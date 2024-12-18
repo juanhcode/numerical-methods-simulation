@@ -3,7 +3,7 @@ from tkinter import messagebox, Label, Entry, Button
 from taylor import serieTaylor
 from newton import method_newton_raphson
 from diferencias_finitas import method_diferencias_finitas
-from ecuaciones_no_lineales import method_biseccion
+from ecuaciones_no_lineales import method_jacobiano
 from ecuaciones_lineales import method_ecuaciones_lineales
 from ecuaciones_diferenciales_parciales import ecuaciones_diferenciales_parciales
 
@@ -126,44 +126,38 @@ def diferencias_finitias(frame, ventana_principal):
 
 
 def ecuaciones_no_lineales(frame, ventana_principal):
-    # Crear interfaz para el método de Bisección
-    label = Label(frame, text="Ecuaciones No Lineales (Método de Bisección)", font=("Helvetica", 16))
+    # Crear interfaz para el método de Jacobiano
+    label = Label(frame, text="Ecuaciones No Lineales (Método de Jacobiano)", font=("Helvetica", 16))
     label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
 
     # Botón para volver al menú principal
     Button(frame, text="Volver", command=ventana_principal).grid(row=0, column=0, pady=10, sticky="w")
 
-    # Entrada para la ecuación f(x)
-    Label(frame, text="Ingresa la ecuación f(x) = 0 (por ejemplo, x^2 - 2): ").grid(row=1, column=0, sticky="e", padx=10, pady=5)
-    entrada_funcion = Entry(frame)
-    entrada_funcion.grid(row=1, column=1, padx=10, pady=5)
+    # Entrada para la primera ecuación f1(x, y)
+    Label(frame, text="Ingresa la primera ecuación f1(x, y) = 0: ").grid(row=1, column=0, sticky="e", padx=10, pady=5)
+    entrada_funcion1 = Entry(frame)
+    entrada_funcion1.grid(row=1, column=1, padx=10, pady=5)
 
-    # Entrada para el intervalo inicial [a, b]
-    Label(frame, text="Ingresa el intervalo inicial [a, b]: ").grid(row=2, column=0, sticky="e", padx=10, pady=5)
-    entrada_intervalo = Entry(frame)
-    entrada_intervalo.grid(row=2, column=1, padx=10, pady=5)
+    # Entrada para la segunda ecuación f2(x, y)
+    Label(frame, text="Ingresa la segunda ecuación f2(x, y) = 0: ").grid(row=2, column=0, sticky="e", padx=10, pady=5)
+    entrada_funcion2 = Entry(frame)
+    entrada_funcion2.grid(row=2, column=1, padx=10, pady=5)
 
-    # Entrada para la tolerancia
-    Label(frame, text="Ingresa la tolerancia: ").grid(row=3, column=0, sticky="e", padx=10, pady=5)
-    entrada_tolerancia = Entry(frame)
-    entrada_tolerancia.grid(row=3, column=1, padx=10, pady=5)
+    # Entrada para la aproximación inicial
+    Label(frame, text="Ingresa la aproximación inicial (x0, y0): ").grid(row=3, column=0, sticky="e", padx=10, pady=5)
+    entrada_aproximacion = Entry(frame)
+    entrada_aproximacion.grid(row=3, column=1, padx=10, pady=5)
 
-    # Entrada para el número máximo de iteraciones
-    Label(frame, text="Ingresa el número máximo de iteraciones: ").grid(row=4, column=0, sticky="e", padx=10, pady=5)
-    entrada_iteraciones = Entry(frame)
-    entrada_iteraciones.grid(row=4, column=1, padx=10, pady=5)
-
-    def ejecutar_biseccion():
+    def ejecutar_jacobiano():
         try:
-            funcion = entrada_funcion.get()
-            intervalo = entrada_intervalo.get()
-            tolerancia = float(entrada_tolerancia.get())
-            iteraciones = int(entrada_iteraciones.get())
-            method_biseccion(funcion, intervalo, tolerancia, iteraciones, frame)
+            funcion1 = entrada_funcion1.get()
+            funcion2 = entrada_funcion2.get()
+            aproximacion = eval(entrada_aproximacion.get())
+            method_jacobiano(funcion1, funcion2, aproximacion, frame)
         except ValueError:
             messagebox.showerror("Error", "Por favor ingresa valores válidos")
 
-    Button(frame, text="Ejecutar Método de Bisección", command=ejecutar_biseccion).grid(row=5, column=0, columnspan=2, pady=10)
+    Button(frame, text="Ejecutar Método de Jacobiano", command=ejecutar_jacobiano).grid(row=4, column=0, columnspan=2, pady=10)
 
 def resolver_ecuaciones_lineales(frame, ventana_principal):
     # Crear interfaz para resolver ecuaciones lineales
