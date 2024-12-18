@@ -43,7 +43,7 @@ def ecuaciones_diferenciales_parciales(funcion, condicion, intervalo, puntos, fr
     # Crear widget de Canvas para insertar en Tkinter
     canvas = FigureCanvasTkAgg(fig, master=frame)
     canvas_widget = canvas.get_tk_widget()
-    canvas_widget.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+    canvas_widget.grid(row=0, column=0, rowspan=6, padx=10, pady=10)
 
     # Botón para iniciar la animación manualmente
     def iniciar_animacion():
@@ -52,9 +52,9 @@ def ecuaciones_diferenciales_parciales(funcion, condicion, intervalo, puntos, fr
             frame_time = lambda frame=f: update(frame)
             frame.after(frame_after, frame_time)
 
-    Button(frame, text="Iniciar Animación", command=iniciar_animacion).grid(row=7, column=0, columnspan=2, pady=10)
+    Button(frame, text="Iniciar Animación", command=iniciar_animacion).grid(row=6, column=0, pady=10)
 
     # Mostrar la solución de la ecuación diferencial parcial en un texto
     solucion_texto = f"Solución de la EDP:\n{u[-1, :, :]}"
     solucion_label = Label(frame, text=solucion_texto, justify='left')
-    solucion_label.grid(row=8, column=0, columnspan=2, padx=10, pady=10)
+    solucion_label.grid(row=0, column=1, rowspan=7, padx=10, pady=10, sticky='n')
