@@ -3,12 +3,25 @@ import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+import re
+import math
 
 # Función para calcular y graficar la serie de Taylor
 def serieTaylor(funcion, a, n, frame):
+
+    def replace_e(match):
+        return str(math.e)
+
+    pattern = r"(?<![\w'])e(?![\w'])"
+    if 'e' in funcion:
+        funcion = re.sub(pattern, replace_e, funcion)
+    if '/' in funcion:
+        funcion = funcion.replace('/', '//')
+
     try:
         x = sp.symbols('x')  # Variable simbólica
         f = sp.parse_expr(funcion)  # Convertir la entrada en una función simbólica
+        print(f)
         T = f.subs(x, a)  # Primer término de la serie de Taylor
         derivadas = [f"f(x) = {f}"]
 

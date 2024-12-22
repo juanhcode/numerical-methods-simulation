@@ -3,8 +3,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import ttk, Label, Entry, Button, messagebox
+import re
+import math
 
 def method_newton_raphson(funcion, x0, tolerancia, iteraciones, frame):
+
+    def replace_e(match):
+        return str(math.e)
+
+    pattern = r"(?<![\w'])e(?![\w'])"
+    if 'e' in funcion:
+        funcion = re.sub(pattern, replace_e, funcion)
+    if '/' in funcion:
+        funcion = funcion.replace('/', '//')
+
     x = sp.symbols('x')
     f = sp.sympify(funcion)
     df = sp.diff(f, x)
