@@ -1,12 +1,15 @@
-from tkinter import Label, Entry, Button, Text, messagebox, Frame
 import sympy as sp
+from sympy import symbols
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from tkinter import messagebox, Frame, Label, Text
+from mpmath import *
+
+
 import re
 import math
 
-# Función para calcular y graficar la serie de Taylor
 def serieTaylor(funcion, a, n, frame):
 
     def replace_e(match):
@@ -24,18 +27,23 @@ def serieTaylor(funcion, a, n, frame):
         print(f)
         T = f.subs(x, a)  # Primer término de la serie de Taylor
         derivadas = [f"f(x) = {f}"]
+        polinomio_str = f"{f.subs(x, a)}"  # Primer término del polinomio como cadena
+        polinomio_exp = sp.sympify(f.subs(x, a))  # Primer término como expresión simbólica
 
         # Calcular los términos de la serie de Taylor
         for k in range(1, n + 1):
             dfk = sp.diff(f, x)  # Derivada k-ésima
             derivadas.append(f"f^{k}(x) = {dfk}")
-            T = T + dfk.subs(x, a) * ((x - a)**k) / sp.factorial(k)  # Añadir término k
+            # Añadir el término k al polinomio (expresión simbólica)
+            term_k = dfk.subs(x, a) * (x - a)**k / sp.factorial(k)
+            polinomio_exp += term_k  # Sumar el término k al polinomio simbólicamente
+            polinomio_str += f" + ({dfk.subs(x, a)} * (x - {a})^{k} / {sp.factorial(k)})"
             f = dfk  # Actualizar la función para la próxima derivada
 
         # Generar el gráfico usando matplotlib
         x_vals = np.linspace(a - 3, a + 3, 400)  # Rango de valores de x
         y_vals_F = [float(sp.N(f.subs(x, val))) for val in x_vals]  # Evaluar la función original
-        y_vals_T = [float(T.subs(x, val)) for val in x_vals]  # Evaluar la serie de Taylor
+        y_vals_T = [float(sp.N(polinomio_exp.subs(x, val))) for val in x_vals]  # Evaluar la serie de Taylor
 
         # Crear la figura
         fig, ax = plt.subplots()
@@ -73,8 +81,32 @@ def serieTaylor(funcion, a, n, frame):
         text_derivadas.insert('1.0', "\n".join(derivadas))
         text_derivadas.config(state='disabled')
 
+       
+        # Mostrar el polinomio de Taylor
+        f = sp.sympify(funcion)  # Convertir la función a una expresión simbólica
+
+        # Expansión de Taylor alrededor de a hasta el término de grado n
+        taylor_expansion = f.series(x, a, n+1).removeO()  # Expansión de Taylor de grado n
+        
+        # Crear un frame para el polinomio de Taylor
+        frame_polinomio = Frame(frame, bg='white')
+        frame_polinomio.grid(row=5, column=2, padx=10, pady=10, sticky='n')
+
+        # Título para el polinomio de Taylor
+        Label(frame_polinomio, text="Polinomio de Taylor", bg='black', font=("Helvetica", 14)).pack(pady=5)
+
+        # Mostrar el polinomio de Taylor en el frame
+        text_polinomio = Text(frame_polinomio, height=5, width=50, bg='black', fg='white')
+        text_polinomio.pack(pady=5)
+        text_polinomio.insert('1.0', str(taylor_expansion))
+        text_polinomio.config(state='disabled')
+
+
+
+
     except Exception as e:
         messagebox.showerror("Error", f"Se produjo un error: {str(e)}")
+
 
 # Función principal de la interfaz para la serie de Taylor
 def series_de_taylor(frame):
