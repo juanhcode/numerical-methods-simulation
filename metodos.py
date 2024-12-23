@@ -143,10 +143,7 @@ def ecuaciones_no_lineales(frame, ventana_principal):
     entrada_funcion2 = Entry(frame)
     entrada_funcion2.grid(row=2, column=1, padx=10, pady=5)
 
-    # Entrada para la tercera ecuación f2(x, y)
-    Label(frame, text="Ingresa la tercera ecuación f3(x, y) = 0: ").grid(row=3, column=0, sticky="e", padx=10, pady=5)
-    entrada_funcion3 = Entry(frame)
-    entrada_funcion3.grid(row=3, column=1, padx=10, pady=5)
+
 
     # Entrada para la aproximación inicial
     Label(frame, text="Ingresa la aproximación inicial (x0, y0): ").grid(row=4, column=0, sticky="e", padx=10, pady=5)
@@ -157,9 +154,8 @@ def ecuaciones_no_lineales(frame, ventana_principal):
         try:
             funcion1 = entrada_funcion1.get()
             funcion2 = entrada_funcion2.get()
-            funcion3 = entrada_funcion3.get()
             aproximacion = eval(entrada_aproximacion.get())
-            method_jacobiano(funcion1, funcion2, funcion3, aproximacion, frame)
+            method_jacobiano(funcion1, funcion2, aproximacion, frame)
         except ValueError:
             messagebox.showerror("Error", "Por favor ingresa valores válidos")
 

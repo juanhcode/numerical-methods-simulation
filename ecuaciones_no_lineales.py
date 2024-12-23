@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 
-def method_jacobiano(funcion1, funcion2, funcion3, aproximacion, frame):
+def method_jacobiano(funcion1, funcion2, aproximacion, frame):
     try:
         # Limpiar el frame
         for widget in frame.winfo_children():
@@ -14,13 +14,12 @@ def method_jacobiano(funcion1, funcion2, funcion3, aproximacion, frame):
         x, y = symbols('x y')
         f1 = sympify(funcion1)
         f2 = sympify(funcion2)
-        f3 = sympify(funcion3)
         x0, y0 = aproximacion
         tol = 1e-6
         max_iter = 50
 
         # Definir las funciones y el Jacobiano
-        F = Matrix([f1, f2, f3])
+        F = Matrix([f1, f2])
         J = F.jacobian([x, y])
 
         iteraciones = []
@@ -63,9 +62,9 @@ def method_jacobiano(funcion1, funcion2, funcion3, aproximacion, frame):
 
         # Insertar datos
         for iteracion in iteraciones:
-            i, x_val, y_val, f1_val, f2_val, f3_val, J_val = iteracion
+            i, x_val, y_val, f1_val, f2_val, J_val = iteracion
             tree.insert("", "end", values=(
-                i, f"{x_val:.6f}", f"{y_val:.6f}", f"{f1_val:.6f}", f"{f2_val:.6f}", f"{f3_val:.6f}", J_val
+                i, f"{x_val:.6f}", f"{y_val:.6f}", f"{f1_val:.6f}", f"{f2_val:.6f}", J_val
             ))
 
         # Crear la gráfica de las iteraciones
@@ -90,41 +89,3 @@ def method_jacobiano(funcion1, funcion2, funcion3, aproximacion, frame):
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-def ecuaciones_no_lineales(frame, ventana_principal):
-    # Crear interfaz para el método de Jacobiano
-    label = Label(frame, text="Ecuaciones No Lineales (Método de Jacobiano)", font=("Helvetica", 16))
-    label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
-
-    # Botón para volver al menú principal
-    Button(frame, text="Volver", command=ventana_principal).grid(row=0, column=0, pady=10, sticky="w")
-
-    # Entrada para la primera ecuación f1(x, y)
-    Label(frame, text="Ingresa la primera ecuación f1(x, y) = 0: ").grid(row=1, column=0, sticky="e", padx=10, pady=5)
-    entrada_funcion1 = Entry(frame)
-    entrada_funcion1.grid(row=1, column=1, padx=10, pady=5)
-
-    # Entrada para la segunda ecuación f2(x, y)
-    Label(frame, text="Ingresa la segunda ecuación f2(x, y) = 0: ").grid(row=2, column=0, sticky="e", padx=10, pady=5)
-    entrada_funcion2 = Entry(frame)
-    entrada_funcion2.grid(row=2, column=1, padx=10, pady=5)
-
-    Label(frame, text="Ingresa la tercera ecuación f3(x, y) = 0: ").grid(row=3, column=0, sticky="e", padx=10, pady=5)
-    entrada_funcion3 = Entry(frame)
-    entrada_funcion3.grid(row=3, column=1, padx=10, pady=5)
-
-    # Entrada para la aproximación inicial
-    Label(frame, text="Ingresa la aproximación inicial (x0, y0): ").grid(row=4, column=0, sticky="e", padx=10, pady=5)
-    entrada_aproximacion = Entry(frame)
-    entrada_aproximacion.grid(row=4, column=1, padx=10, pady=5)
-
-    def ejecutar_jacobiano():
-        try:
-            funcion1 = entrada_funcion1.get()
-            funcion2 = entrada_funcion2.get()
-            funcion3 = entrada_funcion3.get()
-            aproximacion = eval(entrada_aproximacion.get())
-            method_jacobiano(funcion1, funcion2, funcion3, aproximacion, frame)
-        except ValueError:
-            messagebox.showerror("Error", "Por favor ingresa valores válidos")
-
-    Button(frame, text="Ejecutar Método de Jacobiano", command=ejecutar_jacobiano).grid(row=5, column=0, columnspan=2, pady=10)

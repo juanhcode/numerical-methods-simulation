@@ -26,23 +26,31 @@ def method_ecuaciones_lineales(sistema, vector, frame, tolerancia, iteraciones):
     resultado_label = tk.Label(result_frame, text="", bg="#F3F4F6", fg="black", font=("Helvetica", 14))
     resultado_label.pack(pady=10)
 
-    # Definir el método Gauss-Seidel
-    def gauss_seidel(A, b, tol, max_iter):
-        n = len(A)
+    # Definir el método Jacobi
+    def jacobi(A, b, tolerancia, iteraciones):
         x = np.zeros_like(b, dtype=np.double)
-        for k in range(max_iter):
-            x_old = x.copy()
-            for i in range(n):
-                s1 = np.dot(A[i, :i], x[:i])
-                s2 = np.dot(A[i, i + 1:], x_old[i + 1:])
-                x[i] = (b[i] - s1 - s2) / A[i, i]
-            if np.linalg.norm(x - x_old, ord=np.inf) < tol:
-                return x
-        raise Exception("El método no converge")
+        D = np.diag(A)
+        R = A - np.diagflat(D)
+        iter_count = 0
+
+        for _ in range(iteraciones):
+            x_prev = np.copy(x)
+            x = (b - np.dot(R, x)) / D
+            iter_count += 1
+            if np.linalg.norm(x - x_prev) < tolerancia:
+                return x, iter_count
+        return x, iter_count
 
     # Resolver el sistema de ecuaciones
     try:
-        resultado = gauss_seidel(np.array(sistema), np.array(vector), tolerancia, iteraciones)
+        resultado, iteraciones_usadas = jacobi(np.array(sistema).astype(float), np.array(vector).astype(float), tolerancia, iteraciones)
+        resultado_label.config(text=f"Resultado: {resultado}\nIteraciones: {iteraciones_usadas}")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+    # Resolver el sistema de ecuaciones
+    try:
+        resultado = jacobi(np.array(sistema).astype(float), np.array(vector).astype(float), tolerancia, iteraciones)
         resultado_label.config(text=f"Resultado: {resultado}")
     except Exception as e:
         messagebox.showerror("Error", str(e))
